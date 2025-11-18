@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>실시간 스밍 카운터</title>
+<style>
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Gowun Dodum", sans-serif;
+        background: #ffffff;
+        text-align: center;
+        padding: 40px 10px;
+        color: #222;
+        line-height: 1.6;
+    }
+    h1 {
+        font-size: 24px;
+        margin-bottom: 12px;
+    }
+    .card {
+        border: 2px solid #e7e7e7;
+        border-radius: 18px;
+        padding: 20px;
+        width: 320px;
+        margin: 15px auto;
+        font-size: 20px;
+    }
+    .value {
+        font-size: 30px;
+        font-weight: bold;
+        color: #ff4fa3;
+        margin-top: 5px;
+    }
+</style>
+</head>
+<body>
+
+<h1>🎧 실시간 스밍 카운터</h1>
+<p>기준 시간: <strong>2025-11-10 18:00 (KST)</strong></p>
+<p style="font-size:14px; color:#777;">※ 페이지 접속/새로고침 시 자동 계산</p>
+
+<div class="card">
+    BBUU!
+    <div id="bbuu" class="value">Loading...</div>
+</div>
+
+<div class="card">
+    봉숭아
+    <div id="bongsunga" class="value">Loading...</div>
+</div>
+
+<script>
+// 기준 시간
+const startTime = new Date("2025-11-10T18:00:00+09:00");
+
+// 곡 길이 (초)
+const durations = {
+    "BBUU!": 172,
+    "봉숭아": 163,
+    "Dash": 174,
+    "숨바꼭질": 204,
+    "12:32": 193,
+    "Chroma Drift": 210,
+    "Island": 256,
+    "RIZZ": 164
+};
+
+// 플레이리스트 순서
+const playlist = [
+    "BBUU!", "봉숭아", "Dash", "숨바꼭질", "12:32", "BBUU!",
+    "Chroma Drift", "숨바꼭질", "Dash", "봉숭아", "BBUU!",
+    "Island", "Chroma Drift", "숨바꼭질", "BBUU!", "Dash",
+    "봉숭아", "RIZZ", "Island"
+];
+
+function calculatePlays() {
+    const now = new Date();
+    let elapsed = Math.floor((now - startTime) / 1000);
+
+    // 플레이리스트 총 길이
+    const loopSec = playlist.reduce((acc, song) => acc + durations[song], 0);
+
+    // 기본 반복 횟수
+    const fullLoops = Math.floor(elapsed / loopSec);
+    let remaining = elapsed % loopSec;
+
+    // 카운트 초기화
+    let result = { "BBUU!": fullLoops * 0, "봉숭아": fullLoops * 0 };
+    const perLoopCount = { "BBUU!": 0, "봉숭아": 0 };
+    playlist.forEach(song => {
+        if (song in perLoopCount) perLoopCount[song] += 1;
+    });
+    for (let title in result) {
+        result[title] = fullLoops * perLoopCount[title];
+    }
+
+    // 부분 반복 계산
+    for (let song of playlist) {
+        if (remaining >= durations[song]) {
+            if (song in result) result[song]++;
+            remaining -= durations[song];
+        } else break;
+    }
+
+    document.getElementById("bbuu").innerText = result["BBUU!"] + "회";
+    document.getElementById("bongsunga").innerText = result["봉숭아"] + "회";
+}
+
+calculatePlays();
+</script>
+
+</body>
+</html>
